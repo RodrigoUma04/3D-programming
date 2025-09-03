@@ -64,9 +64,6 @@ namespace Unity.FPS.Gameplay
             if (targetRemaining == 0)
             {
                 CompleteObjective(string.Empty, GetUpdatedCounterAmount(), "Objective complete : " + Title);
-
-                WaveCompletedEvent waveEvt = Events.WaveCompletedEvent;
-                EventManager.Broadcast(waveEvt);
             }
             else if (targetRemaining == 1)
             {

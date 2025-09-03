@@ -15,6 +15,7 @@ public class NextWaveButton : MonoBehaviour
 
     public void OnNextWaveButtonPressed()
     {
+        Debug.Log("Next wave button pressed");
         EventManager.Broadcast(Events.WaveStartedEvent);
     }
 }

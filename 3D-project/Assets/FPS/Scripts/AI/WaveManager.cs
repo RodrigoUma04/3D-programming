@@ -19,6 +19,7 @@ namespace Unity.FPS.AI
         private void Awake()
         {
             EventManager.AddListener<WaveStartedEvent>(OnWaveStarted);
+            EventManager.AddListener<AllObjectivesCompletedEvent>(OnWaveCompleted);
         }
 
         void Start()
@@ -32,6 +33,15 @@ namespace Unity.FPS.AI
         }
 
         private void OnWaveStarted(WaveStartedEvent evt) {  StartNextWave(); }
+        private void OnWaveCompleted(AllObjectivesCompletedEvent evt) {
+            if (WaveInProgress && m_EnemyManager.NumberOfEnemiesRemaining == 0)
+            {
+                WaveInProgress = false;
+                WaveCompletedEvent waveCompletedEvent = Events.WaveCompletedEvent;
+                waveCompletedEvent.WaveNumber = CurrentWave;
+                EventManager.Broadcast(waveCompletedEvent);
+            }
+        }
 
         public void StartNextWave()
         {
@@ -48,16 +58,6 @@ namespace Unity.FPS.AI
             {
                 SpawnEnemy();
             }
-        }
-
-        void Update()
-        {
-            if (WaveInProgress && m_EnemyManager.NumberOfEnemiesRemaining == 0)
-            {
-                WaveInProgress = false;
-            }
-
-            Debug.Log(m_EnemyManager.NumberOfEnemiesRemaining);
         }
 
         void SpawnEnemy()
