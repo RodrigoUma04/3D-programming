@@ -15,12 +15,17 @@ namespace Unity.FPS.Gameplay
         public int NotificationEnemiesRemainingThreshold = 3;
 
         int m_KillTotal;
+        private int m_CurrentWaveTarget;
+
+        private bool m_IsCompleted = false;
+        public bool IsCompleted => m_IsCompleted;
 
         protected override void Start()
         {
             base.Start();
 
             EventManager.AddListener<EnemyKillEvent>(OnEnemyKilled);
+            EventManager.AddListener<WaveStartedEvent>(OnWaveStarted);
 
             // set a title and description specific for this type of objective, if it hasn't one
             if (string.IsNullOrEmpty(Title))
@@ -31,9 +36,21 @@ namespace Unity.FPS.Gameplay
                 Description = GetUpdatedCounterAmount();
         }
 
+        private void OnWaveStarted(WaveStartedEvent evt)
+        {
+            // Reset kill count
+            m_KillTotal = 0;
+            m_IsCompleted = false;
+
+            // Determine the number of enemies to track for this wave
+            m_CurrentWaveTarget = MustKillAllEnemies ? evt.WaveEnemyCount : KillsToCompleteObjective;
+
+            UpdateObjective(string.Empty, GetUpdatedCounterAmount(), string.Empty);
+        }
+
         void OnEnemyKilled(EnemyKillEvent evt)
         {
-            if (IsCompleted)
+            if (m_IsCompleted)
                 return;
 
             m_KillTotal++;
@@ -47,6 +64,9 @@ namespace Unity.FPS.Gameplay
             if (targetRemaining == 0)
             {
                 CompleteObjective(string.Empty, GetUpdatedCounterAmount(), "Objective complete : " + Title);
+
+                WaveCompletedEvent waveEvt = Events.WaveCompletedEvent;
+                EventManager.Broadcast(waveEvt);
             }
             else if (targetRemaining == 1)
             {
@@ -74,6 +94,7 @@ namespace Unity.FPS.Gameplay
         void OnDestroy()
         {
             EventManager.RemoveListener<EnemyKillEvent>(OnEnemyKilled);
+            EventManager.AddListener<WaveStartedEvent>(OnWaveStarted);
         }
     }
 }

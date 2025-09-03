@@ -16,6 +16,8 @@ namespace Unity.FPS.Game
         public static AmmoPickupEvent AmmoPickupEvent = new AmmoPickupEvent();
         public static DamageEvent DamageEvent = new DamageEvent();
         public static DisplayMessageEvent DisplayMessageEvent = new DisplayMessageEvent();
+        public static WaveStartedEvent WaveStartedEvent = new WaveStartedEvent();
+        public static WaveCompletedEvent WaveCompletedEvent = new WaveCompletedEvent();
     }
 
     public class ObjectiveUpdateEvent : GameEvent
@@ -62,5 +64,16 @@ namespace Unity.FPS.Game
     {
         public string Message;
         public float DelayBeforeDisplay;
+    }
+
+    public class WaveStartedEvent : GameEvent
+    {
+        public int WaveNumber;
+        public int WaveEnemyCount;
+    }
+
+    public class WaveCompletedEvent : GameEvent
+    {
+        public int WaveNumber;
     }
 }
