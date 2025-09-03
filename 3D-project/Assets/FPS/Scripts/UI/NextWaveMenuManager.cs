@@ -1,5 +1,6 @@
 using Unity.FPS.AI;
 using Unity.FPS.Game;
+using Unity.FPS.Gameplay;
 using UnityEngine;
 
 public class NextWaveMenuManager : MonoBehaviour
@@ -11,7 +12,12 @@ public class NextWaveMenuManager : MonoBehaviour
     [Range(0.001f, 1f)]
     public float VolumeWhenMenuOpen = 0.5f;
 
+    [Tooltip("Upgrade buttons parent to hide when chosen.")]
+    public GameObject UpgradeButtons;
+
     private WaveManager m_WaveManager;
+
+    private bool hasChosen = false;
 
     void Start()
     {
@@ -47,6 +53,8 @@ public class NextWaveMenuManager : MonoBehaviour
 
         if (active)
         {
+            hasChosen = false;
+            UpgradeButtons.SetActive(true);
             Debug.Log("Setting menu active");
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
@@ -64,9 +72,58 @@ public class NextWaveMenuManager : MonoBehaviour
 
     public void OnNextWaveButtonPressed()
     {
-        SetMenuActive(false);
-        EventManager.Broadcast(Events.WaveStartedEvent);
+        if (hasChosen)
+        {
+            SetMenuActive(false);
+            EventManager.Broadcast(Events.WaveStartedEvent);
+        }
     }
+
+    public void OnHealthButtonPressed()
+    {
+        if (!hasChosen)
+        {
+            Debug.Log("Upgraded health by 1");
+            Health health = FindObjectOfType<Health>();
+            if (health != null)
+                health.MaxHealth++;
+            hasChosen = true;
+            UpgradeButtons.SetActive(false);
+        }
+    }
+
+    public void OnSpeedButtonPressed()
+    {
+        if (!hasChosen)
+        {
+            Debug.Log("Upgraded speed by 2");
+            PlayerCharacterController playerCharacterController = FindObjectOfType<PlayerCharacterController>();
+            if (playerCharacterController != null)
+            {
+                playerCharacterController.MaxSpeedOnGround += 2;
+            }
+            hasChosen = true;
+            UpgradeButtons.SetActive(false);
+        }
+    }
+
+    public void OnWeaponButtonPressed()
+    {
+        if (!hasChosen)
+        {
+            Debug.Log("Upgraded weapon max ammo by 4");
+ 
+            WeaponController weaponController = FindObjectOfType<WeaponController>();
+            if (weaponController != null)
+            {
+                weaponController.MaxAmmo += 4;
+                weaponController.AmmoReloadRate += 4;
+            }
+            hasChosen = true;
+            UpgradeButtons.SetActive(false);
+        }
+    }
+
 
     private void OnDestroy()
     {
