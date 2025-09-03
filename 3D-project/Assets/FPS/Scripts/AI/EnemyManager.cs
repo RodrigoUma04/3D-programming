@@ -36,6 +36,12 @@ namespace Unity.FPS.AI
 
             // removes the enemy from the list, so that we can keep track of how many are left on the map
             Enemies.Remove(enemyKilled);
+
+            if (NumberOfEnemiesRemaining == 0)
+            {
+                EventManager.Broadcast(new AllEnemiesKilledEvent());
+                Debug.Log("All enemies killed! Broadcasting AllEnemiesKilledEvent");
+            }
         }
     }
 }

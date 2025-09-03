@@ -76,4 +76,9 @@ namespace Unity.FPS.Game
     {
         public int WaveNumber;
     }
+
+    public class AllEnemiesKilledEvent : GameEvent
+    {
+
+    }
 }

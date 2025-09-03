@@ -14,27 +14,23 @@ namespace Unity.FPS.AI
         public int CurrentWave { get; private set; } = 0;
         public bool WaveInProgress { get; private set; }
 
-        EnemyManager m_EnemyManager;
-
         private void Awake()
         {
             EventManager.AddListener<WaveStartedEvent>(OnWaveStarted);
-            EventManager.AddListener<AllObjectivesCompletedEvent>(OnWaveCompleted);
+            EventManager.AddListener<AllEnemiesKilledEvent>(OnWaveCompleted);
+            EventManager.AddListener<PlayerDeathEvent>(OnPlayerDeath);
         }
 
         void Start()
         {
-            if (m_EnemyManager == null)
-                m_EnemyManager = FindObjectOfType<EnemyManager>();
-
             WaveStartedEvent firstWave = Events.WaveStartedEvent;
-            firstWave.WaveNumber = CurrentWave + 1;
+            firstWave.WaveNumber = CurrentWave + 1 ;
             EventManager.Broadcast(firstWave);
         }
 
         private void OnWaveStarted(WaveStartedEvent evt) {  StartNextWave(); }
-        private void OnWaveCompleted(AllObjectivesCompletedEvent evt) {
-            if (WaveInProgress && m_EnemyManager.NumberOfEnemiesRemaining == 0)
+        private void OnWaveCompleted(AllEnemiesKilledEvent evt) {
+            if (WaveInProgress)
             {
                 WaveInProgress = false;
                 WaveCompletedEvent waveCompletedEvent = Events.WaveCompletedEvent;
@@ -45,6 +41,7 @@ namespace Unity.FPS.AI
 
         public void StartNextWave()
         {
+            Debug.Log("Wave nr. " +  CurrentWave);
             CurrentWave++;
             WaveInProgress = true;
 
@@ -69,6 +66,34 @@ namespace Unity.FPS.AI
             var point = SpawnPoints[Random.Range(0, SpawnPoints.Length)];
 
             Instantiate(prefab, point.position, point.rotation);
+        }
+
+        private void OnPlayerDeath(PlayerDeathEvent evt)
+        {
+            Debug.Log("Player died, resetting waves.");
+
+            WaveInProgress = false;
+
+            CurrentWave = 0;
+
+            var enemyManager = FindObjectOfType<EnemyManager>();
+            if (enemyManager != null)
+            {
+                foreach (var enemy in enemyManager.Enemies)
+                {
+                    if (enemy != null)
+                        Destroy(enemy.gameObject);
+                }
+                enemyManager.Enemies.Clear();
+            }
+        }
+
+
+        private void OnDestroy()
+        {
+            EventManager.RemoveListener<WaveStartedEvent>(OnWaveStarted);
+            EventManager.RemoveListener<AllEnemiesKilledEvent>(OnWaveCompleted);
+            EventManager.RemoveListener<PlayerDeathEvent>(OnPlayerDeath);
         }
     }
 }

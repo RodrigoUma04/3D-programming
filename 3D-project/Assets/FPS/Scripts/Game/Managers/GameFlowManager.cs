@@ -37,7 +37,6 @@ namespace Unity.FPS.Game
         void Awake()
         {
             EventManager.AddListener<PlayerDeathEvent>(OnPlayerDeath);
-            EventManager.AddListener<WaveStartedEvent>(OnWaveStarted);
             EventManager.AddListener<WaveCompletedEvent>(OnWaveCompleted);
         }
 
@@ -65,28 +64,8 @@ namespace Unity.FPS.Game
 
         void OnPlayerDeath(PlayerDeathEvent evt) => HandleGameOver();
 
-        void OnWaveStarted(WaveStartedEvent evt)
-        {
-            Debug.Log("Wave " + evt.WaveNumber + " started");
-            // Could hide panel here if needed
-            if (WaveCompletePanel != null)
-            {
-                WaveCompletePanel.SetActive(false);
-                Time.timeScale = 1f;
-            }
-        }
-
         void OnWaveCompleted(WaveCompletedEvent evt)
         {
-            Debug.Log("Wave " + evt.WaveNumber + " completed");
-
-            // Show the upgrade / wave complete panel
-            if (WaveCompletePanel != null)
-            {
-                WaveCompletePanel.SetActive(true);
-                Time.timeScale = 0f;
-            }
-
             // Play victory sound
             if (VictorySound)
             {
@@ -113,8 +92,7 @@ namespace Unity.FPS.Game
         void OnDestroy()
         {
             EventManager.RemoveListener<PlayerDeathEvent>(OnPlayerDeath);
-            EventManager.AddListener<WaveStartedEvent>(OnWaveStarted);
-            EventManager.AddListener<WaveCompletedEvent>(OnWaveCompleted);
+            EventManager.RemoveListener<WaveCompletedEvent>(OnWaveCompleted);
         }
     }
 }
