@@ -1,4 +1,6 @@
-﻿using Unity.FPS.Game;
+﻿using System.Collections;
+using TMPro;
+using Unity.FPS.Game;
 using UnityEngine;
 
 namespace Unity.FPS.AI
@@ -10,6 +12,9 @@ namespace Unity.FPS.AI
         public Transform[] SpawnPoints;
         public int BaseEnemyCount = 5;
         public float DifficultyMultiplier = 1.5f;
+
+        [Tooltip("The text field displaying the wave coounter")]
+        public TextMeshProUGUI WaveCounterText;
 
         public int CurrentWave { get; private set; } = 0;
         public bool WaveInProgress { get; private set; }
@@ -49,7 +54,19 @@ namespace Unity.FPS.AI
             evt.WaveNumber = CurrentWave;
             Events.WaveStartedEvent = evt;
 
+            if (WaveCounterText != null)
+            {
+                WaveCounterText.text = "Wave " + CurrentWave;
+            }
+
             int enemyCount = Mathf.RoundToInt(BaseEnemyCount * Mathf.Pow(DifficultyMultiplier, CurrentWave - 1));
+
+            StartCoroutine(SpawnEnemiesWithDelay(enemyCount));
+        }
+
+        private IEnumerator SpawnEnemiesWithDelay(int enemyCount)
+        {
+            yield return new WaitForSeconds(2f);
 
             for (int i = 0; i < enemyCount; i++)
             {
